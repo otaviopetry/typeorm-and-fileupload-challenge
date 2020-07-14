@@ -2,7 +2,7 @@ import { MigrationInterface, QueryRunner, TableForeignKey } from 'typeorm';
 
 export default class EstablishTransactionCategoryRelation1594618140370
   implements MigrationInterface {
-  public async up(queryRunner: QueryRunner): Promise<any> {
+  public async up(queryRunner: QueryRunner): Promise<void> {
     // create category_id foreign relation
     await queryRunner.createForeignKey(
       'transactions',
@@ -16,7 +16,7 @@ export default class EstablishTransactionCategoryRelation1594618140370
     );
   }
 
-  public async down(queryRunner: QueryRunner): Promise<any> {
+  public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.dropForeignKey('transactions', 'TransactionCategory');
   }
 }
