@@ -20,35 +20,32 @@ class CreateTransactionService {
     type,
     category,
   }: Request): Promise<Transaction> {
-    // create instance of repository
+    // create instances of repositories
     const transactionsRepository = getCustomRepository(TransactionsRepository);
+    const categoriesRepository = getRepository(Category);
 
+    // store balance
     const balance = await transactionsRepository.getBalance();
 
+    // if transaction is of outcome type and there is not enough balance, throw error
     if (type === 'outcome' && value > balance.total) {
       throw new AppError('Fundos insuficientes');
     }
 
-    const categoriesRepository = getRepository(Category);
-
-    let getCategoryId = '';
-
-    const categoryExists = await categoriesRepository.findOne({
+    // check if category already exists
+    let transactionCategory = await categoriesRepository.findOne({
       where: {
         title: category,
       },
     });
 
-    if (!categoryExists) {
-      const newCategory = categoriesRepository.create({
+    // if it doesnt, create it and store its ID
+    if (!transactionCategory) {
+      transactionCategory = categoriesRepository.create({
         title: category,
       });
 
-      await categoriesRepository.save(newCategory);
-
-      getCategoryId = newCategory.id;
-    } else {
-      getCategoryId = categoryExists.id;
+      await categoriesRepository.save(transactionCategory);
     }
 
     // create transaction object
@@ -56,7 +53,7 @@ class CreateTransactionService {
       title,
       value,
       type,
-      category_id: getCategoryId,
+      category: transactionCategory,
     });
 
     // save it to db

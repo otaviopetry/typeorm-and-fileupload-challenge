@@ -10,17 +10,19 @@ import DeleteTransactionService from '../services/DeleteTransactionService';
 import ImportTransactionsService from '../services/ImportTransactionsService';
 
 const upload = multer(uploadConfig);
-// import AppError from '../errors/AppError';
 
 const transactionsRouter = Router();
 
 transactionsRouter.get('/', async (request, response) => {
-  // TODO
+  // create repository instance
   const transactionsRepository = getCustomRepository(TransactionsRepository);
 
+  // get all transactions and include the relation column
   const transactions = await transactionsRepository.find({
-    relations: ['category_id'],
+    relations: ['category'],
   });
+
+  // store balance
   const balance = await transactionsRepository.getBalance();
 
   return response.json({
@@ -30,7 +32,7 @@ transactionsRouter.get('/', async (request, response) => {
 });
 
 transactionsRouter.post('/', async (request, response) => {
-  // TODO
+  // store req body
   const { title, value, type, category } = request.body;
 
   // Create instance of service
@@ -48,9 +50,10 @@ transactionsRouter.post('/', async (request, response) => {
 });
 
 transactionsRouter.delete('/:id', async (request, response) => {
-  // TODO
+  // store req param
   const { id } = request.params;
 
+  // create instance of service
   const deleteTransaction = new DeleteTransactionService();
 
   // execute
@@ -61,7 +64,7 @@ transactionsRouter.delete('/:id', async (request, response) => {
 
 transactionsRouter.post(
   '/import',
-  upload.single('csvFile'),
+  upload.single('file'),
   async (request, response) => {
     // get file name
     const file = request.file.filename;
@@ -71,9 +74,6 @@ transactionsRouter.post(
 
     // create instance of import service
     const importTransactionService = new ImportTransactionsService();
-
-    // Create instance of create service
-    const createTransaction = new CreateTransactionService();
 
     // execute it
     const importedTransactions = await importTransactionService.execute(

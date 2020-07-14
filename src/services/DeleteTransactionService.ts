@@ -10,9 +10,10 @@ interface Request {
 
 class DeleteTransactionService {
   public async execute({ id }: Request): Promise<any> {
-    // TODO
+    // create repository instance
     const transactionsRepository = getCustomRepository(TransactionsRepository);
 
+    // delete the requested transaction by id
     const deleted = await transactionsRepository.delete({
       id,
     });
