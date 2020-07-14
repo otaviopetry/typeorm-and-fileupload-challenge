@@ -7,7 +7,7 @@ export default class EstablishTransactionCategoryRelation1594618140370
     await queryRunner.createForeignKey(
       'transactions',
       new TableForeignKey({
-        name: 'TransactionCategory',
+        name: 'transactions',
         columnNames: ['category_id'],
         referencedColumnNames: ['id'],
         referencedTableName: 'categories',
