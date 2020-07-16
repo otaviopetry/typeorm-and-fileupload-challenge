@@ -11,43 +11,37 @@ interface Balance {
 @EntityRepository(Transaction)
 class TransactionsRepository extends Repository<Transaction> {
   public async getBalance(): Promise<Balance> {
-    // get all income transactions
-    const allIncomeTransactions = await this.find({
-      where: { type: 'income' },
-    });
+    // get all transactions from THIS repository
+    const transactions = await this.find();
 
-    // get all outcome transactions
-    const allOutcomeTransactions = await this.find({
-      where: { type: 'outcome' },
-    });
+    const balance = transactions.reduce(
+      (acummulator, transaction) => {
+        switch (transaction.type) {
+          case 'income':
+            acummulator.income += Number(transaction.value);
+            break;
 
-    // array for income transaction values
-    const allIncomeValues: Array<number> = [];
+          case 'outcome':
+            acummulator.outcome += Number(transaction.value);
+            break;
 
-    allIncomeTransactions.forEach(transaction => {
-      allIncomeValues.push(transaction.value);
-    });
+          default:
+            break;
+        }
 
-    // array for outcome transaction values
-    const allOutcomeValues: Array<number> = [];
+        return acummulator;
+      },
+      {
+        income: 0,
+        outcome: 0,
+        total: 0,
+      },
+    );
 
-    allOutcomeTransactions.forEach(transaction => {
-      allOutcomeValues.push(transaction.value);
-    });
+    const { income, outcome } = balance;
+    const total = income - outcome;
 
-    // make the mathemagics
-    const allIncome = allIncomeValues.reduce((a, b) => a + b, 0);
-    const allOutcome = allOutcomeValues.reduce((a, b) => a + b, 0);
-    const total = allIncome - allOutcome;
-
-    // create the return object
-    const balance = {
-      income: allIncome,
-      outcome: allOutcome,
-      total,
-    };
-
-    return balance;
+    return { income, outcome, total };
   }
 }
 
